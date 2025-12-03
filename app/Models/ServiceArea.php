@@ -10,7 +10,7 @@ class ServiceArea extends Model
     /** @use HasFactory<\Database\Factories\ServiceAreaFactory> */
     use HasFactory;
 
-    protected $fillable = ['service_id','thana_id','division','country'];
+    protected $fillable = ['service_id','thana_id','division_id','country'];
 
     public function service() {
         return $this->belongsTo(Service::class);

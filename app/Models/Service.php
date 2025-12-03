@@ -32,7 +32,7 @@ class Service extends Model
     }
 
     public function faqs() {
-        return $this->hasMany(ServiceFaq::class);
+        return $this->hasMany(ServiceFaq::class)->orderBy('serial_number', 'asc');
     }
 
     public function orders() {
@@ -41,5 +41,30 @@ class Service extends Model
 
     public function reviews() {
         return $this->hasMany(Review::class);
+    }
+
+    public function getImageUrlAttribute()
+    {
+
+        $imagePath = $this->attributes['image'] ?? null;
+
+
+        if ($imagePath && file_exists(public_path($imagePath))) {
+            return asset($imagePath);
+        }
+
+
+        return asset('assets/images/demo/default.png');
+    }
+
+    public function getFormattedAmountAttribute()
+    {
+        return '৳' . number_format($this->amount, 2);
+    }
+
+    public function getProviderAmountAttribute()
+    {
+        $percentage = $this->provider_percentage ?? 100;
+        return ($this->amount * $percentage) / 100;
     }
 }
