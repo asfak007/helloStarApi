@@ -19,4 +19,19 @@ class Category extends Model
     public function userCategories() {
         return $this->hasMany(UserServiceCategory::class);
     }
+
+    public function getImageUrlAttribute()
+    {
+
+        $imagePath = $this->attributes['icon'] ?? null ;
+
+
+        if ($imagePath && file_exists(public_path($imagePath))) {
+            return asset($imagePath);
+        }
+
+
+        return asset('assets/images/demo/default.png');
+    }
+
 }

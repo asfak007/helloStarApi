@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ServiceRequirementResource extends JsonResource
+class ServiceRequirementOptionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,8 +15,8 @@ class ServiceRequirementResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'description' => $this->description,
-            'options' =>ServiceRequirementOptionResource::collection($this->whenLoaded('options')),
+            'requirement_icon' => $this->requirement_icon_url,
+            'requirement_title' => $this->requirement_title
         ];
     }
 }

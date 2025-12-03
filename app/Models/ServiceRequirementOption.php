@@ -15,4 +15,17 @@ class ServiceRequirementOption extends Model
     public function requirement() {
         return $this->belongsTo(ServiceRequirement::class,'service_requirement_id');
     }
+    public function getRequirementIconUrlAttribute()
+    {
+
+        $imagePath = $this->attributes['requirement_icon'] ?? null;
+
+
+        if ($imagePath && file_exists(public_path($imagePath))) {
+            return asset($imagePath);
+        }
+
+
+        return asset('assets/images/demo/default.png');
+    }
 }

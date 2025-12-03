@@ -12,7 +12,7 @@ class Service extends Model
 
     protected $fillable = [
         'category_id','title','description','image','conditions',
-        'amount','platform_fee','partial_payment','partial_payment_percentage','provider_percentage'
+        'amount','platform_fee','partial_payment','partial_payment_percentage','provider_percentage','reason','reason_image'
     ];
 
     public function category() {
@@ -24,11 +24,11 @@ class Service extends Model
     }
 
     public function processes() {
-        return $this->hasMany(ServiceProcess::class);
+        return $this->hasMany(ServiceProcess::class)->orderBy('serial_number','asc');
     }
 
     public function requirements() {
-        return $this->hasMany(ServiceRequirement::class);
+        return $this->hasMany(ServiceRequirement::class)->with('options');
     }
 
     public function faqs() {
@@ -46,7 +46,7 @@ class Service extends Model
     public function getImageUrlAttribute()
     {
 
-        $imagePath = $this->attributes['image'] ?? null;
+        $imagePath = $this->attributes['image'] ?? null || $this->attributes['reason_image'] ?? null  ;
 
 
         if ($imagePath && file_exists(public_path($imagePath))) {
@@ -57,6 +57,21 @@ class Service extends Model
         return asset('assets/images/demo/default.png');
     }
 
+    public function getReasonImageUrlAttribute()
+    {
+
+        $imagePath =  $this->attributes['reason_image'] ?? null  ;
+
+
+        if ($imagePath && file_exists(public_path($imagePath))) {
+            return asset($imagePath);
+        }
+
+
+        return asset('assets/images/demo/default.png');
+    }
+
+
     public function getFormattedAmountAttribute()
     {
         return '৳' . number_format($this->amount, 2);
@@ -66,5 +81,31 @@ class Service extends Model
     {
         $percentage = $this->provider_percentage ?? 100;
         return ($this->amount * $percentage) / 100;
+    }
+
+    public function getTotalBookingsAttribute()
+    {
+        $count = $this->orders()->count();
+
+        if ($count < 1000) {
+            return (string) $count;
+        }
+
+        if ($count < 1000000) {
+            return number_format($count / 1000, 1) . 'k'; // 1.2k, 3.3k
+        }
+
+        return number_format($count / 1000000, 1) . 'M'; // 1.2M
+    }
+
+    public function getRatingAttribute()
+    {
+        $ratings = $this->reviews()->pluck('rating'); // rating: 1–5 number
+
+        if ($ratings->count() === 0) {
+            return 0; // no rating yet
+        }
+
+        return round($ratings->avg(), 1); // format: 4.3
     }
 }

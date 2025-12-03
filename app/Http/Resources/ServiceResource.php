@@ -19,6 +19,8 @@ class ServiceResource extends JsonResource
             'title'           => $this->title,
             'description'     => $this->description,
             'conditions'      => $this->conditions,
+             'reason'         => $this->reason,
+             'reason_image'   => $this->reason_image_url,
             'amount'          => $this->amount,
             'formatted_amount'=> $this->formatted_amount,
             'provider_amount' => $this->provider_amount,
@@ -26,14 +28,13 @@ class ServiceResource extends JsonResource
             'partial_payment_percentage' => $this->partial_payment_percentage,
             'provider_percentage' => $this->provider_percentage,
             'image'           => $this->image_url,
-
+             'total_booking' => $this->total_bookings,
+             'ratings' => $this->rating,
             // RELATIONS
-            'category'       => new CategoryResource($this->whenLoaded('category')),
-            'areas'          => ServiceAreaResource::collection($this->whenLoaded('areas')),
+
             'processes'      => ServiceProcessResource::collection($this->whenLoaded('processes')),
             'requirements'   => ServiceRequirementResource::collection($this->whenLoaded('requirements')),
             'faqs'           => ServiceFaqResource::collection($this->whenLoaded('faqs')),
-            'reviews'        => ReviewResource::collection($this->whenLoaded('reviews')),
         ];
     }
 }

@@ -14,4 +14,18 @@ class ServiceProcess extends Model
     public function service() {
         return $this->belongsTo(Service::class);
     }
+
+    public function getImageUrlAttribute()
+    {
+
+        $imagePath = $this->attributes['image'] ?? null;
+
+
+        if ($imagePath && file_exists(public_path($imagePath))) {
+            return asset($imagePath);
+        }
+
+
+        return asset('assets/images/demo/default.png');
+    }
 }
