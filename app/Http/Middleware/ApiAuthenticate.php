@@ -17,10 +17,8 @@ class ApiAuthenticate
     public function handle(Request $request, Closure $next): Response
     {
 
-        $token = $request->bearerToken();
-
-
-        $user = User::where('api_token', $token)->first();
+        // Use Laravel's auth guard for Sanctum
+        $user = $request->user('sanctum');
 
         if (!$user) {
             return response()->json([
@@ -33,7 +31,8 @@ class ApiAuthenticate
         $request->setUserResolver(fn() => $user);
 
         return $next($request);
+    }
 
         
-    }
+
 }

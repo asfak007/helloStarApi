@@ -15,10 +15,8 @@ class CheckUserRole
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
-         $user = $request->user();
+        $user = $request->user();
 
-        // 🧠 Example: If you're using JWT or token auth
-        // you can attach the user to the request in ApiAuthenticate middleware
         if (!$user) {
             return response()->json([
                 'status' => 401,
@@ -26,13 +24,16 @@ class CheckUserRole
             ], 401);
         }
 
-        // 🚫 If user doesn’t match required role
-        if ($user->role !== $role) {
+        // ✔ Check role using role slug/name
+        if (!strtolower($user->role->name) !== strtolower($role)) {
             return response()->json([
                 'status' => 403,
                 'message' => 'Forbidden: You don’t have access to this resource',
             ], 403);
         }
+
         return $next($request);
     }
 }
+
+
