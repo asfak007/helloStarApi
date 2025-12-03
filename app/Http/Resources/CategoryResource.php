@@ -17,7 +17,10 @@ class CategoryResource extends JsonResource
          return [
             'id' => $this->id,
             'title' => $this->title,
-             'icon' => $this->image_url
-        ];
+             'icon' => $this->image_url,
+             'service'      => ServiceResource::collection($this->whenLoaded('services')),
+
+
+         ];
     }
 }

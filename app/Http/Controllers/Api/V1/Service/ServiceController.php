@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api\V1\Service;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ServiceAvaibilabilityRequest;
+use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ServiceResource;
+use App\Models\Category;
 use App\Models\Service;
 use Illuminate\Http\Request;
 
@@ -32,15 +34,13 @@ class ServiceController extends Controller
             return ApiResponseHelper::success(new ServiceResource($service), 'Service retrieved successfully');
         }
 
-        $services = Service::with([
+        $services = Category::with([
 
-            'processes',
-            'requirements',
-            'faqs',
-            'reviews'
+            'services'
+
         ])->get();
 
-        return ApiResponseHelper::success(ServiceResource::collection($services), 'Services retrieved successfully');
+        return ApiResponseHelper::success(CategoryResource::collection($services), 'Services retrieved successfully');
     }
 
     public function popularServices()
