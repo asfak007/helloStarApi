@@ -23,7 +23,15 @@ class User extends Authenticatable
         'password','ref_token','point','is_varified'
     ];
 
-    protected $hidden = ['password'];
+    protected $hidden = ['password','is_varified'];
+
+    protected $appends = ['verified_status'];
+
+    // verified status Accessor
+    public function getVerifiedStatusAttribute()
+    {
+        return $this->is_varified ? 'verified' : 'not_verified';
+    }
 
     public function role()
     {
