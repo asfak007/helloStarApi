@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ServiceFaq extends Model
+class PointTransaction extends Model
 {
-    /** @use HasFactory<\Database\Factories\ServiceFaqFactory> */
+    /** @use HasFactory<\Database\Factories\PointTransactionFactory> */
     use HasFactory;
 }
