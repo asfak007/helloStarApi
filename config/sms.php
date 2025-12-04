@@ -1,8 +1,6 @@
 <?php
 return [
-    'url' => env('SMS_API_URL', ''),
-
-    // For BD local SMS API
-    'api_key' => env('SMS_API_KEY', ''),
-    'sender_id' => env('SMS_SENDER_ID', '880'),
+    'url' =>  'https://msg.elitbuzz-bd.com/smsapi',
+    'api_key' =>  'C2009241680253bca40b88.41400456',
+    'sender_id' =>  'HelloSTAR',
 ];

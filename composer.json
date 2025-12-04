@@ -9,6 +9,7 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.2",
+        "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1"
     },
     "require-dev": {
@@ -28,7 +29,8 @@
         },
         "files": [
             "app/Helpers/SmsHelper.php",
-            "app/Helpers/ApiResponseHelper.php"
+            "app/Helpers/ApiResponseHelper.php",
+            "app/Helpers/OtpHelper.php"
         ]
     },
     "autoload-dev": {

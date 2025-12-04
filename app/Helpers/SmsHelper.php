@@ -6,36 +6,46 @@ use Illuminate\Support\Facades\Log;
 
 class SmsHelper
 {
-    /**
-     * Send SMS using any SMS API.
-     */
+
     public static function send(string $phone, string $message): array
     {
         try {
-
-            // ---- Example SMS Gateway API ----
-            // Replace with your provider's URL + params
-            $response = Http::asForm()->post(config('sms.url'), [
+            $response = Http::withOptions([
+                'verify' => false, // Disable SSL verification (unsafe)
+            ])->asForm()->post(config('sms.url'), [
                 'api_key'   => config('sms.api_key'),
                 'senderid'  => config('sms.sender_id'),
-                'number'    => $phone,
-                'message'   => $message,
+                'contacts'  => $phone,
+                'msg'       => $message,
+                'type'      => 'text',
             ]);
 
-            // Log for debugging
+            $responseData = [];
+            try {
+                $responseData = $response->json();
+            } catch (\Throwable $e) {
+                $responseData = ['raw' => $response->body()];
+            }
+
+
+
+            $success = $response->successful();
+
             Log::info('SMS Sent', [
                 'phone' => $phone,
                 'message' => $message,
-                'response' => $response->body()
+                'response' => $responseData,
+                'success' => $success,
             ]);
 
+
+
             return [
-                'success' => $response->successful(),
-                'response' => $response->json() ?? $response->body(),
+                'success' => $success,
+                'response' => $responseData,
             ];
 
         } catch (\Throwable $e) {
-
             Log::error('SMS Sending Failed', [
                 'error' => $e->getMessage(),
                 'phone' => $phone,

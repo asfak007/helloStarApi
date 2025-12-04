@@ -1,10 +1,16 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Auth\RegistrationController;
 use App\Http\Controllers\Api\V1\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('login', [AuthController::class, 'login']);
-Route::prefix('v1/auth')->middleware('api.auth')->group(function () {
-    Route::get('/', fn() => response()->json(['message' => 'Login success']));
+Route::prefix('v1/auth')->group(function () {
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register/customer', [RegistrationController::class, 'registerCustomer']);
+    Route::post('/register/nrb', [RegistrationController::class, 'registerNRB']);
+    Route::middleware('api.auth')->group(function () {
+        Route::get('/', fn() => response()->json(['message' => 'Login success']));
+
+    });
 
 });
