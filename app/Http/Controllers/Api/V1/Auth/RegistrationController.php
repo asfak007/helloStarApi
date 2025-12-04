@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
+use App\Helpers\OtpHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CustomerRegisterRequest;
 use App\Http\Requests\NRBRegisterRequest;
@@ -40,6 +41,8 @@ class RegistrationController extends Controller
                 'is_varified' => false, // Will be verified via OTP
             ]);
 
+            $otp  = OtpHelper::generateOtp($user->number);
+
             $token = $user->createToken('customer-auth-token')->plainTextToken;
 
 
@@ -48,6 +51,7 @@ class RegistrationController extends Controller
                 'success' => true,
                 'message' => 'Customer registration successful. Please verify your mobile number.',
                 'user' => new UserResource($user),
+                'otp' => $otp,
                 'token' => $token, // Optional: remove if not using immediate login
                 'requires_verification' => true,
             ], 201);
