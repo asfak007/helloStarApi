@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Search;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Service;
+use App\Models\ServiceArea;
 use Illuminate\Http\Request;
 
 class ServiceSearchController extends Controller
@@ -69,6 +72,8 @@ class ServiceSearchController extends Controller
 
                 $services = $getFilteredServices($categoryId, $request->search);
 
+
+
                 return response()->json([
                     'step' => 2,
                     'message' => 'Filtered by search text',
@@ -77,20 +82,34 @@ class ServiceSearchController extends Controller
 
             // STEP 3: Check Area Availability
             case 3:
-                $request->validate(['area_id' => 'required|integer']);
 
-                $categoryId = session('category_id');
-                $searchText = session('search_keyword');
+                $areaId = $request->area_id ?? null;
+                if ($areaId) {
+                    $request->validate(['area_id' => 'required|integer']);
 
-                session(['area_id' => $request->area_id]);
+                    $categoryId = session('category_id');
+                    $searchText = session('search_keyword');
 
-                $services = $getFilteredServices($categoryId, $searchText, $request->area_id);
+                    session(['area_id' => $request->area_id]);
 
-                return response()->json([
-                    'step' => 3,
-                    'message' => 'Area availability checked',
-                    'services' => $services
-                ]);
+                    $services = $getFilteredServices($categoryId, $searchText, $request->area_id);
+
+                    return response()->json([
+                        'step' => 3,
+                        'message' => 'Area availability checked',
+                        'services' => $services
+                    ]);
+                }else{
+                    $servicesId = $request->validate(['service_id' => 'required|integer']);
+                    $areas = ServiceArea::where('service_id', $servicesId)->get();
+                    session(['service_id' => $servicesId]);
+                    return response()->json([
+                        'step' => 3,
+                        'message' => 'all areas available',
+                        'services' => $areas
+                    ]);
+                }
+
 
             // STEP 4: Save Checkout Info
             case 4:
