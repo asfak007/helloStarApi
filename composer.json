@@ -30,7 +30,8 @@
         "files": [
             "app/Helpers/SmsHelper.php",
             "app/Helpers/ApiResponseHelper.php",
-            "app/Helpers/OtpHelper.php"
+            "app/Helpers/OtpHelper.php",
+            "app/Helpers/EmailOtpHelper.php"
         ]
     },
     "autoload-dev": {

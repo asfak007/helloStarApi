@@ -8,4 +8,7 @@ Route::prefix('v1/otp')->group(function () {
     Route::post('/send-otp', [OtpController::class, 'sendOtp']);
     Route::post('/verify-otp', [OtpController::class, 'verifyOtp']);
 
+    Route::post('email/send-otp', [OtpController::class, 'send']);
+    Route::post('email/verify-otp', [OtpController::class, 'verify']);
+
 });

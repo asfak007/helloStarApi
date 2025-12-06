@@ -9,6 +9,6 @@ class Otp extends Model
 {
     /** @use HasFactory<\Database\Factories\OtpFactory> */
     use HasFactory;
-    protected $fillable = ['phone', 'otp_code', 'is_used', 'expires_at'];
+    protected $fillable = ['phone','email', 'otp_code', 'is_used', 'expires_at'];
 
 }
