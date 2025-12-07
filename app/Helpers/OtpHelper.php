@@ -1,121 +1,140 @@
 <?php
+
 namespace App\Helpers;
 
 use App\Models\Otp;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use Exception;
 use Illuminate\Support\Facades\Mail;
+use Exception;
 
 class OtpHelper
 {
-    /**
-     * Generate and send OTP
-     *
-     * @param string $phone
-     * @param int $length
-     * @param int $expiryMinutes
-     * @return Otp
-     * @throws Exception
-     */
-    public static function generateOtp(string $phone, int $length = 4, int $expiryMinutes = 5): Otp
+    // Generate SMS OTP
+    public static function generateSmsOtp(string $phone, int $length = 4, int $expiryMinutes = 5)
     {
-        // Generate numeric OTP
+        if (self::throttleSms($phone)) {
+            throw new Exception('Please wait 1 minute before requesting another OTP.');
+        }
+
         $otpCode = '';
         for ($i = 0; $i < $length; $i++) {
             $otpCode .= random_int(0, 9);
         }
 
-        // Send SMS
-        $smsResponse = SmsHelper::send($phone, "Your OTP is: {$otpCode}");
+        $smsResponse = SmsHelper::send($phone, "Your OTP is: $otpCode");
+
+
 
         if (!$smsResponse['success']) {
-            Log::error("OTP sending failed for {$phone}", ['error' => $smsResponse['error'] ?? null]);
             throw new Exception($smsResponse['error'] ?? 'Failed to send OTP');
         }
 
-        // Create OTP record
-        $otp = Otp::create([
+        $otpRecord = Otp::create([
             'phone' => $phone,
             'otp_code' => $otpCode,
-            'expires_at' => Carbon::now()->addMinutes($expiryMinutes),
+            'expires_at' => now()->addMinutes($expiryMinutes),
+            'is_used' => false,
         ]);
 
-        return $otp;
+        Log::info('SMS OTP Sent', [
+            'phone' => $phone,
+            'otp_code' => $otpCode,
+            'sms_response' => $smsResponse,
+        ]);
+
+        return $otpRecord;
     }
 
-    /**
-     * Verify OTP
-     */
-    public static function verifyOtp(string $phone, string $otpCode): bool
+    // Verify SMS OTP
+    public static function verifySmsOtp(string $phone, string $otpCode): bool
     {
-        $otp = Otp::where('phone', $phone)
+        $user = User::where('number', $phone)->first();
+        if($user) {
+            $user->is_varified = true;
+            $user->save();
+        }
+        $record = Otp::where('phone', $phone)
             ->where('otp_code', $otpCode)
-            ->where('is_used', false)
-            ->where('expires_at', '>', Carbon::now())
-            ->first();
-
-        if (!$otp) {
-            return false;
-        }
-
-        $otp->is_used = true;
-        $otp->save();
-
-        return true;
-    }
-
-
-    public static function send(string $email, int $otp, string $subject = null, int $expiryMinutes = 5): array
-    {
-        $subject = $subject ?? "Your OTP Code";
-
-        try {
-            $messageBody = "Your OTP is: $otp\nThis code will expire in $expiryMinutes minutes.";
-
-            Mail::raw($messageBody, function ($msg) use ($email, $subject) {
-                $msg->to($email)->subject($subject);
-            });
-
-            Log::info('Email OTP Sent', [
-                'email' => $email,
-                'otp' => $otp,
-                'subject' => $subject,
-            ]);
-
-            return ['success' => true, 'message' => "OTP sent successfully to {$email}"];
-
-        } catch (\Throwable $e) {
-            Log::error('Email OTP Sending Failed', [
-                'email' => $email,
-                'error' => $e->getMessage(),
-            ]);
-
-            return ['success' => false, 'error' => $e->getMessage()];
-        }
-    }
-    //  OTP throttling (1 minute limit)
-    public static function throttle(string $email): bool
-    {
-        return Otp::where('email', $email)
-            ->where('created_at', '>=', now()->subMinute())
-            ->exists();
-    }
-
-    //  Verify OTP
-    public static function verifyEmailOtp(string $otp, string $email): bool
-    {
-        $record = Otp::where('email', $email)
-            ->where('otp_code', $otp)
             ->where('is_used', false)
             ->where('expires_at', '>=', now())
             ->first();
 
-        if (!$record) {
-            return false;
-        }
+        if (!$record) return false;
 
         $record->update(['is_used' => true]);
         return true;
+    }
+
+    // Throttle  (1 per minute)
+    public static function throttleSms(string $phone): bool
+    {
+        return Otp::where('phone', $phone)
+            ->where('created_at', '>=', now()->subMinute())
+            ->exists();
+    }
+
+    // Generate Email OTP
+    public static function generateEmailOtp(string $email, int $length = 4, int $expiryMinutes = 5): Otp
+    {
+        if (self::throttleEmail($email)) {
+            throw new Exception('Please wait 1 minute before requesting another OTP.');
+        }
+
+        $otpCode = '';
+        for ($i = 0; $i < $length; $i++) {
+            $otpCode .= random_int(0, 9);
+        }
+
+        $messageBody = "Your OTP is: $otpCode\nThis code will expire in $expiryMinutes minutes.";
+
+        Mail::raw($messageBody, function ($msg) use ($email) {
+            $msg->to($email)->subject('Your OTP Code');
+        });
+
+        $otpRecord = Otp::create([
+            'email' => $email,
+            'otp_code' => $otpCode,
+            'expires_at' => now()->addMinutes($expiryMinutes),
+            'is_used' => false,
+        ]);
+
+        Log::info('Email OTP Sent', [
+            'email' => $email,
+            'otp_code' => $otpCode,
+        ]);
+
+        return $otpRecord;
+    }
+
+    // Verify Email OTP
+    public static function verifyEmailOtp(string $otpCode, string $email): bool
+    {
+
+        $user = User::where('email', $email)->first();
+        if($user) {
+            $user->is_varified = true;
+            $user->save();
+        }
+
+        $record = Otp::where('email', $email)
+            ->where('otp_code', $otpCode)
+            ->where('is_used', false)
+            ->where('expires_at', '>=', now())
+            ->first();
+
+        if (!$record) return false;
+
+        $record->update(['is_used' => true]);
+        return true;
+    }
+
+    // Throttle Email OTP (1 per minute)
+    public static function throttleEmail(string $email): bool
+    {
+        return Otp::where('email', $email)
+            ->where('created_at', '>=', now()->subMinute())
+            ->exists();
     }
 }

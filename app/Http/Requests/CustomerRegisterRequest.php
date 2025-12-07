@@ -19,7 +19,7 @@ class CustomerRegisterRequest extends FormRequest
         return [
             'name' => 'required|string|max:100',
             'mobile_number' => 'required|string|max:20|unique:users,number',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8',
             'terms' => 'required|accepted',
         ];
     }

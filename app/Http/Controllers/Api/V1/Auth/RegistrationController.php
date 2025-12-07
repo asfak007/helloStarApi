@@ -9,7 +9,6 @@ use App\Http\Requests\NRBRegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class RegistrationController extends Controller
@@ -23,6 +22,7 @@ class RegistrationController extends Controller
             if (!$customerRole) {
                 $customerRole = Role::create([
                     'name' => 'customer',
+                    'guard_name' => 'customer'
 
                 ]);
             }
@@ -41,7 +41,7 @@ class RegistrationController extends Controller
                 'is_varified' => false, // Will be verified via OTP
             ]);
 
-            $otp  = OtpHelper::generateOtp($user->number);
+            $otp  = OtpHelper::generateSmsOtp($user->number);
 
             $token = $user->createToken('customer-auth-token')->plainTextToken;
 
@@ -74,6 +74,7 @@ class RegistrationController extends Controller
             if (!$nrbRole) {
                 $nrbRole = Role::create([
                     'name' => 'nrb',
+                    'guard_name' => 'nrb'
                 ]);
             }
 
@@ -93,7 +94,7 @@ class RegistrationController extends Controller
 
             $token = $user->createToken('nrb-auth-token')->plainTextToken;
 
-            $otp  = OtpHelper::send($user->email);
+            $otp  = OtpHelper::generateEmailOtp($user->email);
 
             return response()->json([
                 'success' => true,
