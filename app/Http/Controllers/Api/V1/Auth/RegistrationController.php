@@ -10,9 +10,60 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\Mime\Email;
 
 class RegistrationController extends Controller
 {
+
+    // Check if user with given number or email is already registered
+    public function checkUserRegistrationStatus($number = null, $email = null)
+    {
+        // Check email first
+        if ($email !== null) {
+            if (User::where('email', $email)->where('is_varified', true)->exists()) {
+                return response()->json([
+                    'status' => 409,
+                    'success' => false,
+                    'message' => 'Email already registered and verified. Please login.',
+                ], 409);
+            }
+
+            if (User::where('email', $email)->where('is_varified', false)->exists()) {
+
+                OtpHelper::generateEmailOtp($email);
+
+                return response()->json([
+                    'status' => 400,
+                    'success' => false,
+                    'message' => 'Email already registered but not verified. OTP sent successfully. Please verify your email.',
+                ], 400);
+            }
+        }
+
+        // Check mobile number
+        if ($number !== null) {
+            if (User::where('number', $number)->where('is_varified', true)->exists()) {
+                return response()->json([
+                    'status' => 409,
+                    'success' => false,
+                    'message' => 'Mobile number already registered and verified. Please login.',
+                ], 409);
+            }
+
+            if (User::where('number', $number)->where('is_varified', false)->exists()) {
+                OtpHelper::generateSmsOtp($number);
+                return response()->json([
+                    'status' => 400,
+                    'success' => false,
+                    'message' => 'Mobile number already registered but not verified. OTP sent successfully. Please verify your number.',
+                ], 400);
+            }
+        }
+
+        // No conflict found
+        return null;
+    }
+
     public function registerCustomer(CustomerRegisterRequest $request)
     {
         try {
@@ -26,6 +77,14 @@ class RegistrationController extends Controller
 
                 ]);
             }
+
+
+            $response = $this->checkUserRegistrationStatus($request->mobile_number, null);
+            if ($response) {
+                return $response; // stops registration if conflict exists
+            }
+
+
 
             // Generate referral token
             $refToken = $this->generateRefToken();
@@ -49,7 +108,7 @@ class RegistrationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Customer registration successful. Please verify your mobile number.',
+                'message' => 'Customer registration successful. OTP sent successfully. Please verify your mobile number.',
                 'user' => new UserResource($user),
                 'otp' => $otp,
                 'token' => $token, // Optional: remove if not using immediate login
@@ -58,6 +117,7 @@ class RegistrationController extends Controller
 
         } catch (\Exception $e) {
             return response()->json([
+                'status' => 500,
                 'success' => false,
                 'message' => 'Registration failed',
                 'error' => $e->getMessage()
@@ -76,6 +136,14 @@ class RegistrationController extends Controller
                     'name' => 'nrb',
                     'guard_name' => 'nrb'
                 ]);
+            }
+
+            if (User::where('email', $request->email)->exists()) {
+                return response()->json([
+                    'status' => 400,
+                    'success' => false,
+                    'message' => 'Email already registered',
+                ], 400);
             }
 
             // Generate referral token
@@ -97,15 +165,16 @@ class RegistrationController extends Controller
             $otp  = OtpHelper::generateEmailOtp($user->email);
 
             return response()->json([
+                'status' => 201,
                 'success' => true,
-                'message' => 'NRB registration successful. Please verify your email address.',
-                'user' => new UserResource($user),
-                'token' => $token, // Optional: remove if not using immediate login
+                'message' => 'NRB registration successful. OTP sent successfully. Please verify your email address.',
+
                 'requires_verification' => true,
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
+                'status' => 500,
                 'success' => false,
                 'message' => 'Registration failed',
                 'error' => $e->getMessage()

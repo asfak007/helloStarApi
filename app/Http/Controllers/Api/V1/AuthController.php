@@ -28,14 +28,15 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'success' => false,
+
+                'success' => 401,
                 'message' => 'Invalid credentials',
             ], 401);
         }
 
         if (!$user->is_varified) {
             return response()->json([
-                'success' => false,
+                'success' => 403,
                 'message' => 'Phone/email not verified',
             ], 403);
         }

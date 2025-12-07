@@ -18,7 +18,7 @@ class EmailOtpHelper
         }
 
         // Send Email OTP
-        $response = OtpHelper::send($email, (int)$otpCode, null, $expiryMinutes);
+        $response = OtpHelper::generateEmailOtp($email, (int)$otpCode, null, $expiryMinutes);
 
         if (!$response['success']) {
             Log::error("OTP sending failed for {$email}", ['error' => $response['error'] ?? null]);
