@@ -27,12 +27,12 @@ class ApiAuthenticate
             ], 401);
         }
 
-        // ✅ Attach user to request
+        //  Attach user to request
         $request->setUserResolver(fn() => $user);
 
         return $next($request);
     }
 
-        
+
 
 }

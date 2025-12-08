@@ -45,6 +45,7 @@ class AuthController extends Controller
         $token = $user->createToken(Str::random(150))->plainTextToken;
 
         return response()->json([
+            'status' => 200,
             'success' => true,
             'message' => 'Login successful',
             'access_token' => $token,

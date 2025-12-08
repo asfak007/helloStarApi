@@ -15,4 +15,19 @@ class Blog extends Model
     public function category() {
         return $this->belongsTo(BlogCategory::class,'blog_category_id');
     }
+    
+
+    public function getImageUrlAttribute()
+    {
+
+        $imagePath = $this->attributes['image'] ?? null || $this->attributes['reason_image'] ?? null  ;
+
+
+        if ($imagePath && file_exists(public_path($imagePath))) {
+            return asset($imagePath);
+        }
+
+
+        return asset('assets/images/demo/default.png');
+    }
 }

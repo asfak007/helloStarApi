@@ -8,11 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckUserRole
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next, string $role): Response
     {
         $user = $request->user();
@@ -24,8 +19,8 @@ class CheckUserRole
             ], 401);
         }
 
-        // ✔ Check role using role slug/name
-        if (!strtolower($user->role->name) !== strtolower($role)) {
+        // FIXED: correct role comparison
+        if (strtolower($user->role->name) !== strtolower($role)) {
             return response()->json([
                 'status' => 403,
                 'message' => 'Forbidden: You don’t have access to this resource',
@@ -35,5 +30,3 @@ class CheckUserRole
         return $next($request);
     }
 }
-
-

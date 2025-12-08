@@ -6,7 +6,9 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,18 +23,19 @@ return Application::configure(basePath: dirname(__DIR__))
     )
 
     ->withMiddleware(function (Middleware $middleware) {
-        // 🌐 Global middleware (runs on every request)
+        //  Global middleware (runs on every request)
         $middleware->web([
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
         ]);
 
-        // 🧱 Define custom middleware aliases
+        //  Define custom middleware aliases
         $middleware->alias([
             'api.auth' => \App\Http\Middleware\ApiAuthenticate::class, // your custom auth middleware
             'ip.throttle' => \App\Http\Middleware\IpThrottleMiddleware::class,
+            'role' => \App\Http\Middleware\CheckUserRole::class,
         ]);
 
-        // ⚙️ Define middleware groups
+        //  Define middleware groups
         $middleware->group('api', [
             'ip.throttle',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -85,7 +88,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // Log 5xx errors
             if ($status >= 500) {
-                \Log::error($e->getMessage(), [
+                    Log::error($e->getMessage(), [
                     'exception' => $e,
                     'url' => $request->fullUrl(),
                 ]);
