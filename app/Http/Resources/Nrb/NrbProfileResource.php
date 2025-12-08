@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Nrb;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CustomerProfileResponse extends JsonResource
+class NrbProfileResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,9 +16,10 @@ class CustomerProfileResponse extends JsonResource
     {
         return [
             'name' => $this->name,
-            'number' => $this->number,
+            'email' => $this->email,
             'image' => $this->image_url,
             'verified_status' => $this->verified_status,
         ];
     }
+
 }

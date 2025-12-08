@@ -1,36 +1,34 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Customer;
+namespace App\Http\Controllers\Api\V1\Nrb;
 
 use App\Helpers\ApiResponseHelper;
-use App\Helpers\ImageUploadHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CustomerProfileRequest;
-use App\Http\Requests\CustomerProfileUpdateRequest;
-use App\Http\Resources\CustomerProfileResponse;
-use Nette\Utils\Image;
+use App\Http\Requests\Nrb\NrbProfileUpdateRequest;
+use App\Http\Resources\Nrb\NrbProfileResource;
+use App\Helpers\ImageUploadHelper;
+use Illuminate\Container\Attributes\Auth;
+use Illuminate\Support\Facades\Request;
 
-class CustomerProfileController extends Controller
+class NrbProfileController extends Controller
 {
     //
-
-    public function getProfile(CustomerProfileRequest $request)
+    public function getProfile(Request $request)
     {
         $user = $request->user();
 
-        return ApiResponseHelper::success(new CustomerProfileResponse($user),"Profile fetched successfully",200);
+        return ApiResponseHelper::success(new NrbProfileResource($user),"Profile fetched successfully",200);
 
 
     }
 
-    public function updateProfile(CustomerProfileUpdateRequest $request)
+    public function updateProfile(NrbProfileUpdateRequest $request)
     {
         $user = $request->user();
 
         if ($request->all()==[]) {
             return ApiResponseHelper::error("No data provided for update",400);
         }
-
 
 
         // UPDATE NAME
@@ -57,9 +55,9 @@ class CustomerProfileController extends Controller
 
         $user->save();
 
+        return ApiResponseHelper::success(new NrbProfileResource($user),"Profile updated successfully",200);
 
 
-        return ApiResponseHelper::success(new CustomerProfileResponse($user),"Profile updated successfully",200);
 
     }
 }
