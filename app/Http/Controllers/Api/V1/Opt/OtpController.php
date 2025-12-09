@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Opt;
 use App\Helpers\ApiResponseHelper;
 use App\Helpers\OtpHelper;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Exception;
 
@@ -15,8 +16,6 @@ class OtpController extends Controller
         $request->validate([
             'phone' => 'required|string',
         ]);
-
-
 
         try {
             $data = OtpHelper::generateSmsOtp($request->phone);
@@ -66,6 +65,8 @@ class OtpController extends Controller
             'email' => 'required|email',
             'otp_code' => 'required|string',
         ]);
+
+
 
         $isValid = OtpHelper::verifyEmailOtp($request->otp_code, $request->email);
 

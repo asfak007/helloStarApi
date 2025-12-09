@@ -162,7 +162,7 @@ class RegistrationController extends Controller
 
             $token = $user->createToken('nrb-auth-token')->plainTextToken;
 
-            $otp  = OtpHelper::generateEmailOtp($user->email);
+            OtpHelper::generateEmailOtp($user->email);
 
             return response()->json([
                 'status' => 201,

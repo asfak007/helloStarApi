@@ -51,7 +51,8 @@ class OtpHelper
     public static function verifySmsOtp(string $phone, string $otpCode): bool
     {
         $user = User::where('number', $phone)->first();
-        if($user) {
+
+        if($user->is_varified ===false) {
             $user->is_varified = true;
             $user->save();
         }
@@ -113,7 +114,10 @@ class OtpHelper
     {
 
         $user = User::where('email', $email)->first();
-        if($user) {
+
+
+
+        if($user){
             $user->is_varified = true;
             $user->save();
         }
