@@ -10,6 +10,7 @@ Route::prefix('v1/auth')->group(function () {
     Route::post('/register/nrb', [RegistrationController::class, 'registerNRB']);
     Route::middleware('api.auth')->group(function () {
         Route::post('/change-password', [AuthController::class, 'changePassword']);
+        Route::post('/change-password/kog', [AuthController::class, 'changePassword']);
 
     });
 
