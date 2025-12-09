@@ -10,7 +10,6 @@ use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Symfony\Component\Mime\Email;
 
 class RegistrationController extends Controller
 {

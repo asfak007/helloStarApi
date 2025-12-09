@@ -9,7 +9,7 @@ Route::prefix('v1/auth')->group(function () {
     Route::post('register/customer', [RegistrationController::class, 'registerCustomer']);
     Route::post('/register/nrb', [RegistrationController::class, 'registerNRB']);
     Route::middleware('api.auth')->group(function () {
-        Route::get('/', fn() => response()->json(['message' => 'Login success']));
+        Route::post('/change-password', [AuthController::class, 'changePassword']);
 
     });
 
