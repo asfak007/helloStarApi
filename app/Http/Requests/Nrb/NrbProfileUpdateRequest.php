@@ -19,8 +19,8 @@ class NrbProfileUpdateRequest extends FormRequest
         $userId = $this->user()->id;
 
         return [
-            'name'  => 'nullable|string|max(255)',
-            'email' => 'nullable|string|max(20)|unique:users,email,' . $userId,
+            'name'  => 'nullable|string',
+            'email' => 'nullable|string|unique:users,email,' . $userId,
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ];
     }

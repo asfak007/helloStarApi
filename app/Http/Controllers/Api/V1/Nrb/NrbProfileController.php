@@ -7,20 +7,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Nrb\NrbProfileUpdateRequest;
 use App\Http\Resources\Nrb\NrbProfileResource;
 use App\Helpers\ImageUploadHelper;
-use Illuminate\Container\Attributes\Auth;
-use Illuminate\Support\Facades\Request;
 
 class NrbProfileController extends Controller
 {
     //
-    public function getProfile(Request $request)
+
+    public function getProfile()
     {
-        $user = $request->user();
+        $user = request()->user();
 
         return ApiResponseHelper::success(new NrbProfileResource($user),"Profile fetched successfully",200);
 
-
     }
+
 
     public function updateProfile(NrbProfileUpdateRequest $request)
     {
@@ -45,8 +44,8 @@ class NrbProfileController extends Controller
         if ($request->hasFile('image')) {
             $user->image = ImageUploadHelper::upload(
                 $request->file('image'),  // UploadedFile
-                'assets/images/customers',        // Folder
-                'customer_'.$user->id,     // Old image to delete
+                'assets/images/nrb',        // Folder
+                'nrb_'.$user->id,     // Old image to delete
                 75,                       // Quality
                 500,                      // Max width
                 500                       // Max height

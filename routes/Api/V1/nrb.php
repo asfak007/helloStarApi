@@ -7,7 +7,6 @@ Route::middleware(['api.auth', 'role:nrb'])
     ->prefix('v1/nrb')
     ->group(function () {
 
-        Route::get('/', fn() => response()->json(['message' => 'Login success']));
 
         Route::prefix('profile')->group(function () {
             Route::get('/', [NrbProfileController::class, 'getProfile']);

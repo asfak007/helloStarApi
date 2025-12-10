@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('title', 255);
             $table->text('description')->nullable();
             $table->text('image')->nullable();
+            $table->string('reason', 255)->nullable();
+            $table->text('reason_image')->nullable();
             $table->text('conditions')->nullable();
             $table->integer('amount');
             $table->integer('platform_fee');
