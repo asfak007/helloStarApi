@@ -110,7 +110,7 @@ class RegistrationController extends Controller
                 'message' => 'Customer registration successful. OTP sent successfully. Please verify your mobile number.',
                 'user' => new UserResource($user),
                 'otp' => $otp,
-                'token' => $token, // Optional: remove if not using immediate login
+                // 'token' => $token, // Optional: remove if not using immediate login
                 'requires_verification' => true,
             ], 201);
 
@@ -161,13 +161,14 @@ class RegistrationController extends Controller
 
             $token = $user->createToken('nrb-auth-token')->plainTextToken;
 
-            OtpHelper::generateEmailOtp($user->email);
+            $otp = OtpHelper::generateEmailOtp($user->email);
 
             return response()->json([
                 'status' => 201,
                 'success' => true,
                 'message' => 'NRB registration successful. OTP sent successfully. Please verify your email address.',
-
+                'user' => new UserResource($user),
+                'otp' => $otp,
                 'requires_verification' => true,
             ], 201);
 

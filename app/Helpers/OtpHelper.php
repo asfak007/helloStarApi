@@ -52,10 +52,11 @@ class OtpHelper
     {
         $user = User::where('number', $phone)->first();
 
-        if($user->is_varified ===false) {
+        if($user->is_varified == 0){
             $user->is_varified = true;
             $user->save();
         }
+
         $record = Otp::where('phone', $phone)
             ->where('otp_code', $otpCode)
             ->where('is_used', false)
@@ -114,8 +115,6 @@ class OtpHelper
     {
 
         $user = User::where('email', $email)->first();
-
-
 
         if($user){
             $user->is_varified = true;

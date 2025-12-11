@@ -7,6 +7,7 @@ class ApiResponseHelper
     {
         return response()->json([
             'status' => $code,
+            'success' => true,
             'message' => $message,
             'data' => $data
         ], $code);
@@ -16,6 +17,7 @@ class ApiResponseHelper
     {
         $response = [
             'status' => $code,
+            'success' => false,
             'message' => $message
         ];
 

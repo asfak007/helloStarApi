@@ -29,15 +29,16 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-
-                'success' => 401,
+                'status' => 401,
+                'success' => false,
                 'message' => 'Invalid credentials',
             ], 401);
         }
 
         if (!$user->is_varified) {
             return response()->json([
-                'success' => 403,
+                'status' => 403,
+                'success' =>false,
                 'message' => 'Phone/email not verified',
             ], 403);
         }
@@ -68,7 +69,8 @@ class AuthController extends Controller
         // Check old password
         if (!Hash::check($request->old_password, $user->password)) {
             return response()->json([
-                'status' => false,
+                'status' => 400,
+                'success' => false,
                 'message' => 'Old password is incorrect',
             ], 400);
         }
@@ -76,7 +78,8 @@ class AuthController extends Controller
         // If old == new
         if ($request->old_password === $request->new_password) {
             return response()->json([
-                'status' => false,
+                'status' => 400,
+                'success' => false,
                 'message' => 'New password cannot be the same as old password',
             ], 400);
         }
@@ -86,7 +89,8 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json([
-            'status' => true,
+            'status' => 200,
+            'success' => true,
             'message' => 'Password changed successfully',
         ], 200);
     }
