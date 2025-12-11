@@ -94,4 +94,26 @@ class AuthController extends Controller
             'message' => 'Password changed successfully',
         ], 200);
     }
+
+    public function destroy(Request $request)
+    {
+        if($request->number){
+            $user = User::where('number', $request->number)->first();
+        }
+        if($request->email){
+            $user = User::where('email', $request->email)->first();
+        }
+
+        // Delete all tokens
+        $user->tokens()->delete();
+
+        // Delete user
+        $user->delete();
+
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'User account deleted successfully',
+        ], 200);
+    }
 }
