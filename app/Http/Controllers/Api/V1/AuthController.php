@@ -25,6 +25,7 @@ class AuthController extends Controller
             ? ['email' => $loginField]
             : ['number' => $loginField];
 
+
         $user = User::where($credentials)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {

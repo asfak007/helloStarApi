@@ -8,6 +8,12 @@ Route::prefix('v1/auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register/customer', [RegistrationController::class, 'registerCustomer']);
     Route::post('/register/nrb', [RegistrationController::class, 'registerNRB']);
+    Route::post('/register/provider', [RegistrationController::class, 'registerServiceProvider']);
+    Route::post('/register/student', [RegistrationController::class, 'studentProfessionalsRegister']);
+    Route::post('/register/professional', [RegistrationController::class, 'studentProfessionalsRegister']);
+
+
+
     Route::post('/delete-user', [AuthController::class, 'destroy']);
     Route::middleware('api.auth')->group(function () {
         Route::post('/change-password', [AuthController::class, 'changePassword']);

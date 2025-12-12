@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('divisions', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('slug');
+            $table->string('name');
+            $table->string('slug')->nullable();
             $table->timestamps();
         });
     }

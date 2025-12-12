@@ -10,7 +10,7 @@ class District extends Model
     /** @use HasFactory<\Database\Factories\DistrictFactory> */
     use HasFactory;
 
-    protected $fillable = ['division_id','title','slug'];
+    protected $fillable = ['division_id','name','slug'];
 
     public function division() {
         return $this->belongsTo(Division::class);

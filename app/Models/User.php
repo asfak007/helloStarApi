@@ -13,30 +13,65 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable,HasApiTokens;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name','email','number','image','role_id',
-        'password','ref_token','point','is_varified'
+   protected $fillable = [
+        'name',
+        'email',
+        'number',
+        'image',
+        'role_id',
+        'password',
+        'ref_token',
+        'point',
+        'is_varified',
     ];
 
-    protected $hidden = ['password','is_varified'];
+    protected $hidden = [
+        'password',
+        'is_varified',
+    ];
 
-    protected $appends = ['verified_status'];
+    protected $casts = [
+        'is_varified' => 'boolean',
+    ];
 
-    // verified status Accessor
+    protected $appends = [
+        'verified_status',
+        'image_url',
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS
+    |--------------------------------------------------------------------------
+    */
+
     public function getVerifiedStatusAttribute()
     {
         return $this->is_varified ? 'verified' : 'not_verified';
     }
 
+    public function getImageUrlAttribute()
+    {
+        $imagePath = $this->attributes['image'] ?? null;
+
+        if ($imagePath && file_exists(public_path($imagePath))) {
+            return asset($imagePath);
+        }
+
+        return asset('assets/images/demo/default.png');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
+
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
+
     public function details()
     {
         return $this->hasOne(UserDetail::class);
@@ -49,12 +84,12 @@ class User extends Authenticatable
 
     public function referralsGiven()
     {
-        return $this->hasMany(Referral::class,'referrer_id');
+        return $this->hasMany(Referral::class, 'referrer_id');
     }
 
     public function referralsReceived()
     {
-        return $this->hasMany(Referral::class,'referred_user_id');
+        return $this->hasMany(Referral::class, 'referred_user_id');
     }
 
     public function rewards()
@@ -74,45 +109,31 @@ class User extends Authenticatable
 
     public function orders()
     {
-        return $this->hasMany(Order::class,'user_id');
+        return $this->hasMany(Order::class, 'user_id');
     }
 
     public function reviews()
     {
-        return $this->hasMany(Review::class,'customer_id');
+        return $this->hasMany(Review::class, 'customer_id');
     }
 
     public function providerReviews()
     {
-        return $this->hasMany(Review::class,'provider_id');
+        return $this->hasMany(Review::class, 'provider_id');
     }
 
     public function providerEarnings()
     {
-        return $this->hasMany(ProviderEarning::class,'provider_id');
+        return $this->hasMany(ProviderEarning::class, 'provider_id');
     }
 
     public function payoutSettings()
     {
-        return $this->hasOne(ProviderPayoutSetting::class,'provider_id');
+        return $this->hasOne(ProviderPayoutSetting::class, 'provider_id');
     }
 
     public function payoutAccounts()
     {
-        return $this->hasMany(ProviderPayoutAccount::class,'provider_id');
-    }
-
-    public function getImageUrlAttribute()
-    {
-
-        $imagePath = $this->attributes['image'] ?? null ;
-
-
-        if ($imagePath && file_exists(public_path($imagePath))) {
-            return asset($imagePath);
-        }
-
-
-        return asset('assets/images/demo/default.png');
+        return $this->hasMany(ProviderPayoutAccount::class, 'provider_id');
     }
 }
