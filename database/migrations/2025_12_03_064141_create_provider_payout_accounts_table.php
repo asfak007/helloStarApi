@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('provider_id')->constrained('users')->cascadeOnDelete();
             $table->enum('account_type', ['bkash','nagad','rocket','bank']);
-            $table->string('account_name', 150);
-            $table->string('account_number', 200);
+            $table->string('account_name', 150)->nullable();
+            $table->string('account_number', 200)->nullable();
             $table->string('bank_name', 150)->nullable();
             $table->string('branch_name', 150)->nullable();
             $table->string('routing_number', 50)->nullable();

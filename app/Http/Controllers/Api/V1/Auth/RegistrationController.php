@@ -10,6 +10,7 @@ use App\Http\Requests\NRBRegisterRequest;
 use App\Http\Requests\ServiceProviderRegistrationRequest;
 use App\Http\Requests\StudentAndProfissonalRegistrationRequest;
 use App\Http\Resources\UserResource;
+use App\Models\ProviderPayoutAccount;
 use App\Models\Role;
 use App\Models\Service;
 use App\Models\User;
@@ -310,25 +311,23 @@ class RegistrationController extends Controller
             if ($request->payout_type) {
 
                 $payoutData = [
-                    'type' => $request->payout_type,
-                    'mfs' => $request->payout_type === 'mfs'
-                        ? [
-                            'provider' => $request->mfs_provider,
-                            'number'   => $request->mfs_number,
-                        ]
-                        : null,
-
-                    'bank' => $request->payout_type === 'bank'
-                        ? [
-                            'bank_name'      => $request->bank_name,
-                            'account_name'   => $request->account_name,
-                            'account_number' => $request->account_number,
-                        ]
-                        : null,
+                    'provider_id' => $user->id,
+                    'type'        => $request->payout_type,
                 ];
 
-                $user->payout = json_encode($payoutData);
-                $user->save();
+                if ($request->payout_type === 'mfs') {
+                    $payoutData['account_type']   = $request->mfs_provider;
+                    $payoutData['account_number'] = $request->mfs_number;
+                }
+
+                if ($request->payout_type === 'bank') {
+                    $payoutData['account_type']   = 'bank';
+                    $payoutData['bank_name']      = $request->bank_name;
+                    $payoutData['account_name']   = $request->account_name;
+                    $payoutData['account_number'] = $request->account_number;
+                }
+
+                ProviderPayoutAccount::create($payoutData);
             }
 
             DB::commit();
@@ -348,7 +347,8 @@ class RegistrationController extends Controller
 
             DB::rollBack();
             return response()->json([
-                'error' => true,
+                'status' => 500,
+                'success' => false,
                 'message' => $e->getMessage()
             ], 500);
         }

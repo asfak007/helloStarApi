@@ -100,10 +100,10 @@ class AuthController extends Controller
     public function destroy(Request $request)
     {
         if($request->number){
-            $user = User::where('number', $request->number)->first();
+            $user = User::with(['payoutAccounts','addresses','serviceCategories'])->where('number', $request->number)->first();
         }
         if($request->email){
-            $user = User::where('email', $request->email)->first();
+            $user = User::with(['payoutAccounts','addresses','serviceCategories'])->where('email', $request->email)->first();
         }
 
         // Delete all tokens
@@ -111,6 +111,7 @@ class AuthController extends Controller
 
         // Delete user
         $user->delete();
+
 
         return response()->json([
             'status' => 200,
