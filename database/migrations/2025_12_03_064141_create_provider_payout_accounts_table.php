@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('account_name', 150)->nullable();
             $table->string('account_number', 200)->nullable();
             $table->string('bank_name', 150)->nullable();
-            $table->string('branch_name', 150)->nullable();
-            $table->string('routing_number', 50)->nullable();
+            // $table->string('branch_name', 150)->nullable();
+            // $table->string('routing_number', 50)->nullable();
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
