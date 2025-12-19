@@ -14,9 +14,9 @@ class OtpHelper
     // Generate SMS OTP
     public static function generateSmsOtp(string $phone, int $length = 4, int $expiryMinutes = 5)
     {
-        if (self::throttleSms($phone)) {
-            throw new Exception('Please wait 1 minute before requesting another OTP.');
-        }
+        // if (self::throttleSms($phone)) {
+        //     throw new Exception('Please wait 1 minute before requesting another OTP.');
+        // }
 
         $otpCode = '';
         for ($i = 0; $i < $length; $i++) {
@@ -80,9 +80,9 @@ class OtpHelper
     // Generate Email OTP
     public static function generateEmailOtp(string $email, int $length = 4, int $expiryMinutes = 5): Otp
     {
-        if (self::throttleEmail($email)) {
-            throw new Exception('Please wait 1 minute before requesting another OTP.');
-        }
+        // if (self::throttleEmail($email)) {
+        //     throw new Exception('Please wait 1 minute before requesting another OTP.');
+        // }
 
         $otpCode = '';
         for ($i = 0; $i < $length; $i++) {

@@ -26,7 +26,7 @@ class AuthController extends Controller
             : ['number' => $loginField];
 
 
-        $user = User::where($credentials)->first();
+        $user = User::where($credentials)->with('role')->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -53,6 +53,7 @@ class AuthController extends Controller
             'message' => 'Login successful',
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'user_role' => $user->role->name,
             'user' => new UserResource($user)
         ]);
     }

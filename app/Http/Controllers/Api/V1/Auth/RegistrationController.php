@@ -227,7 +227,7 @@ class RegistrationController extends Controller
                 'email'     => $request->email,
                 'number'    => $request->mobile_number,
                 'password'  => Hash::make($request->password),
-                'role_id'   => $providerRole, // optional default role
+                'role_id'   => $providerRole->id, // optional default role
             ]);
 
 
