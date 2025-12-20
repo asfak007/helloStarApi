@@ -231,6 +231,20 @@ class RegistrationController extends Controller
                 'role_id'   => $providerRole->id,
             ]);
 
+            // Upload profile image if provided
+            if($request->hasFile('image')) {
+                $image = ImageUploadHelper::upload(
+                    $request->file('image'),
+                    'assets/images/providers',
+                    'provider_'.$user->id,
+                    75,
+                    800,
+                    800
+                );
+                $user->image = $image;
+                $user->save();
+            }
+
 
             // Upload optional files
             $nidFront = $request->hasFile('nid_front_side')
@@ -387,6 +401,20 @@ class RegistrationController extends Controller
                 'role_id'   => $providerRole->id , // optional default role
             ]);
 
+                        // Upload profile image if provided
+            if($request->hasFile('image')) {
+                $image = ImageUploadHelper::upload(
+                    $request->file('image'),
+                    'assets/images/students',
+                    'student_'.$user->id,
+                    75,
+                    800,
+                    800
+                );
+                $user->image = $image;
+                $user->save();
+            }
+
 
             // Upload optional files
             $nidFront = $request->hasFile('nid_front_side')
@@ -531,6 +559,20 @@ class RegistrationController extends Controller
                 'password'  => Hash::make($request->password),
                 'role_id'   => $providerRole->id, // optional default role
             ]);
+
+            // Upload profile image if professional provided
+            if($request->hasFile('image')) {
+                $image = ImageUploadHelper::upload(
+                    $request->file('image'),
+                    'assets/images/professionals',
+                    'professional_'.$user->id,
+                    75,
+                    800,
+                    800
+                );
+                $user->image = $image;
+                $user->save();
+            }
 
 
             // Upload optional files

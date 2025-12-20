@@ -32,6 +32,9 @@ class ServiceProviderRegistrationRequest extends FormRequest
         // Optional fields
         'email'     => 'nullable|email|unique:users,email',
         'role_id'   => 'nullable|exists:roles,id',
+        'division_id' => 'required|exists:divisions,id',
+        'district_id' => 'required|exists:districts,id',
+        'thana_id'    => 'required|exists:thanas,id',
 
         // Optional details
         'professional_category_id'      => 'nullable|array',
