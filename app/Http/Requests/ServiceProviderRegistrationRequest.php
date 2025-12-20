@@ -27,11 +27,7 @@ class ServiceProviderRegistrationRequest extends FormRequest
         'name'      => 'required|string|max:100',
         'mobile_number'    => 'required|string|max:20|unique:users,number',
         'password'  => 'required|min:6',
-        'division_id' => 'required|exists:divisions,id',
-        'district_id' => 'required|exists:districts,id',
-        'thana_id'    => 'required|exists:thanas,id',
-        'address'        => 'required|string',
-        'permanent_address' => 'required|string',
+
 
         // Optional fields
         'email'     => 'nullable|email|unique:users,email',
@@ -43,11 +39,7 @@ class ServiceProviderRegistrationRequest extends FormRequest
 
         'education_type' => 'nullable|in:ssc,hsc,diploma,bachelor,masters,other',
 
-        // 'division_id'  => 'nullable|exists:divisions,id',
-        // 'district_id'  => 'nullable|exists:districts,id',
-        // 'thana_id'     => 'nullable|exists:thanas,id',
-        // 'area'         => 'nullable|string',
-        // 'permanent_address' => 'nullable|string',
+
 
         // Optional Files
         'nid_front_side' => 'nullable|image|max:2048',

@@ -228,7 +228,7 @@ class RegistrationController extends Controller
                 'email'     => $request->email,
                 'number'    => $request->mobile_number,
                 'password'  => Hash::make($request->password),
-                'role_id'   => $providerRole->id, // optional default role
+                'role_id'   => $providerRole->id,
             ]);
 
 
@@ -354,17 +354,19 @@ class RegistrationController extends Controller
         }
     }
 
-    public function studentProfessionalsRegister(StudentAndProfissonalRegistrationRequest $request)
+
+
+    public function studentRegister(StudentAndProfissonalRegistrationRequest $request)
     {
         DB::beginTransaction();
 
 
-        $providerRole = Role::where('name', 'provider')->first();
+        $providerRole = Role::where('name', 'student')->first();
 
             if (!$providerRole) {
                 $providerRole = Role::create([
-                    'name' => 'provider',
-                    'guard_name' => 'provider'
+                    'name' => 'student',
+                    'guard_name' => 'student'
                 ]);
             }
 
@@ -382,7 +384,7 @@ class RegistrationController extends Controller
                 'email'     => $request->email,
                 'number'    => $request->mobile_number,
                 'password'  => Hash::make($request->password),
-                'role_id'   => $request->role_id ?? 3, // optional default role
+                'role_id'   => $providerRole->id , // optional default role
             ]);
 
 
@@ -425,11 +427,6 @@ class RegistrationController extends Controller
             if (
                 $request->professional_category_id ||
                 $request->education_type ||
-                $request->division_id ||
-                $request->district_id ||
-                $request->thana_id ||
-                $request->address ||
-                $request->permanent_address ||
                 $nidFront ||
                 $nidBack ||
                 $certPaths
@@ -440,10 +437,6 @@ class RegistrationController extends Controller
                         ? json_encode($request->professional_category_id)
                         : null,
                     'education_type' => $request->education_type,
-                    'division_id'  => $request->division_id,
-                    'district_id'  => $request->district_id,
-                    'thana_id'     => $request->thana_id,
-                    'area'         => $request->address,
                     'permanent_address' => $request->permanent_address,
                     'nid_front_side' => $nidFront,
                     'nid_back_side'  => $nidBack,
@@ -451,7 +444,7 @@ class RegistrationController extends Controller
                 ]);
             }
 
-            // Save categories in pivot table if provided
+            // Save categories in pivot table if student
             if ($request->professional_category_id) {
                 foreach ($request->professional_category_id as $cid) {
                     UserServiceCategory::create([
@@ -461,31 +454,173 @@ class RegistrationController extends Controller
                 }
             }
 
-            // Save payout info if provided
             if ($request->payout_type) {
 
                 $payoutData = [
-                    'type' => $request->payout_type,
-                    'mfs' => $request->payout_type === 'mfs'
-                        ? [
-                            'provider' => $request->mfs_provider,
-                            'number'   => $request->mfs_number,
-                        ]
-                        : null,
-
-                    'bank' => $request->payout_type === 'bank'
-                        ? [
-                            'bank_name'      => $request->bank_name,
-                            'account_name'   => $request->account_name,
-                            'account_number' => $request->account_number,
-                        ]
-                        : null,
+                    'provider_id' => $user->id,
+                    'type'        => $request->payout_type,
                 ];
 
-                $user->payout = json_encode($payoutData);
-                $user->save();
+                if ($request->payout_type === 'mfs') {
+                    $payoutData['account_type']   = $request->mfs_provider;
+                    $payoutData['account_number'] = $request->mfs_number;
+                }
+
+                if ($request->payout_type === 'bank') {
+                    $payoutData['account_type']   = 'bank';
+                    $payoutData['bank_name']      = $request->bank_name;
+                    $payoutData['account_name']   = $request->account_name;
+                    $payoutData['account_number'] = $request->account_number;
+                }
+
+                ProviderPayoutAccount::create($payoutData);
             }
 
+            DB::commit();
+
+            $otp = OtpHelper::generateSmsOtp($user->number);
+
+            return response()->json([
+                'status' => 201,
+                'success' => true,
+                'message' => ' registration successful. OTP sent successfully. Please verify your mobile number.',
+                'user' => new UserResource($user),
+                'otp' => $otp,
+                'requires_verification' => true,
+            ], 201);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+            return response()->json([
+                'error' => true,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function ProfessionalsRegister(StudentAndProfissonalRegistrationRequest $request)
+    {
+        DB::beginTransaction();
+
+
+        $providerRole = Role::where('name', 'professional')->first();
+
+
+
+            if (!$providerRole) {
+                $providerRole = Role::create([
+                    'name' => 'professional',
+                    'guard_name' => 'professional'
+                ]);
+            }
+
+
+            $response = $this->checkUserRegistrationStatus($request->mobile_number, null);
+            if ($response) {
+                return $response; // stops registration if conflict exists
+            }
+
+        try {
+
+            // Create User (only required fields)
+            $user = User::create([
+                'name'      => $request->name,
+                'email'     => $request->email,
+                'number'    => $request->mobile_number,
+                'password'  => Hash::make($request->password),
+                'role_id'   => $providerRole->id, // optional default role
+            ]);
+
+
+            // Upload optional files
+            $nidFront = $request->hasFile('nid_front_side')
+                ? ImageUploadHelper::upload(
+                    $request->file('nid_front_side'),  // UploadedFile
+                    'assets/images/nid',        // Folder
+                    'nid_front_'.$user->id,     // Old image to delete
+                    75,                       // Quality
+                    800,                      // Max width
+                    800                       // Max height
+                )
+                : null;
+
+            $nidBack = $request->hasFile('nid_back_side')
+                ? ImageUploadHelper::upload(
+                    $request->file('nid_back_side'),  // UploadedFile
+                    'assets/images/nid',        // Folder
+                    'nid_back_'.$user->id,     // Old image to delete
+                    75,                       // Quality
+                    800,                      // Max width
+                    800                       // Max height
+                )
+                : null;
+
+            $certPaths = $request->hasFile('certificates')
+            ? ImageUploadHelper::upload(
+                $request->file('certificates'),  // UploadedFile array
+                'assets/images/certificates',    // Folder
+                'cert_'.$user->id,               // Old image prefix to delete
+                75,                               // Quality
+                800,                              // Max width
+                800                               // Max height
+            ):
+            null
+            ;
+
+            // Create user_details only if ANY optional detail is provided
+            if (
+                $request->professional_category_id ||
+                $request->education_type ||
+                $nidFront ||
+                $nidBack ||
+                $certPaths
+            ) {
+                UserDetail::create([
+                    'user_id' => $user->id,
+                    'professional_category_id' => $request->professional_category_id
+                        ? json_encode($request->professional_category_id)
+                        : null,
+                    'education_type' => $request->education_type,
+                    'permanent_address' => $request->permanent_address,
+                    'nid_front_side' => $nidFront,
+                    'nid_back_side'  => $nidBack,
+                    'certificates'   => $certPaths,
+                ]);
+            }
+
+            // Save categories in pivot table if student
+            if ($request->professional_category_id) {
+                foreach ($request->professional_category_id as $cid) {
+                    UserServiceCategory::create([
+                        'user_id' => $user->id,
+                        'category_id' => $cid
+                    ]);
+                }
+            }
+
+            // Save payout info if student
+            if ($request->payout_type) {
+
+                $payoutData = [
+                    'provider_id' => $user->id,
+                    'type'        => $request->payout_type,
+                ];
+
+                if ($request->payout_type === 'mfs') {
+                    $payoutData['account_type']   = $request->mfs_provider;
+                    $payoutData['account_number'] = $request->mfs_number;
+                }
+
+                if ($request->payout_type === 'bank') {
+                    $payoutData['account_type']   = 'bank';
+                    $payoutData['bank_name']      = $request->bank_name;
+                    $payoutData['account_name']   = $request->account_name;
+                    $payoutData['account_number'] = $request->account_number;
+                }
+
+                ProviderPayoutAccount::create($payoutData);
+            }
             DB::commit();
 
             $otp = OtpHelper::generateSmsOtp($user->number);

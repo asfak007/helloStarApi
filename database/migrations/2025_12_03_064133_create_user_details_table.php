@@ -16,10 +16,10 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->json('professional_category_id')->nullable();
             $table->enum('education_type', ['ssc','hsc','diploma','bachelor','masters','other'])->nullable();
-            $table->foreignId('division_id')->constrained('divisions')->cascadeOnDelete();
-            $table->foreignId('district_id')->constrained('districts')->cascadeOnDelete();
-            $table->string('area');
-            $table->foreignId('thana_id')->constrained('thanas')->cascadeOnDelete();
+            $table->foreignId('division_id')->constrained('divisions')->cascadeOnDelete()->nullable();
+            $table->foreignId('district_id')->constrained('districts')->cascadeOnDelete()->nullable();
+            $table->string('area')->nullable();
+            $table->foreignId('thana_id')->constrained('thanas')->cascadeOnDelete()->nullable();
             $table->string('permanent_address')->nullable();
             $table->text('nid_front_side')->nullable();
             $table->text('nid_back_side')->nullable();
