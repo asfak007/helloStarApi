@@ -13,7 +13,7 @@ class UserDetail extends Model
     protected $fillable = [
         'user_id','professional_category_id','education_type',
         'division_id','district_id','area','thana_id',
-        'permanent_address','nid_front_side','nid_back_side','certificates'
+        'permanent_address','nid_front_side','nid_back_side','certificates','professional_name'
     ];
 
     public function user()

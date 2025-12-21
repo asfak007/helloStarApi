@@ -6,9 +6,9 @@ use App\Helpers\ApiResponseHelper;
 use App\Helpers\ImageUploadHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Provider\ProviderProfileUpdateRequest;
-use App\Http\Resources\Nrb\NrbProfileResource;
+
 use App\Http\Resources\Provider\providerProfileResource;
-use App\Models\User;
+use App\Models\UserDetail;
 use App\Models\UserServiceCategory;
 
 class ProviderProfileController extends Controller
@@ -18,9 +18,8 @@ class ProviderProfileController extends Controller
     {
         $user = request()->user();
 
-        return $user;
 
-        // return ApiResponseHelper::success(new providerProfileResource($user),"Profile fetched successfully",200);
+        return ApiResponseHelper::success(new providerProfileResource($user),"Profile fetched successfully",200);
 
     }
 
@@ -44,13 +43,10 @@ class ProviderProfileController extends Controller
             $user->number = $request->phone;
         }
 
-        if ($request->filled('professional_name')) {
-            $user->professional_name = $request->professional_name;
-        }
-
         if ($request->filled('email')) {
             $user->email = $request->email;
         }
+        $user->save();
         // UPDATE PROFESSIONAL CATEGORIES
         if ($request->professional_category_id) {
                 foreach ($request->professional_category_id as $cid) {
@@ -75,40 +71,65 @@ class ProviderProfileController extends Controller
             );
         }
 
-        if ($request->hasFile('nid_front_side')) {
-            $user->nid_front_side = ImageUploadHelper::upload(
-                $request->file('nid_front_side'),
-                'assets/images/provider/nid',
-                'provider_nid_front_'.$user->id,
-                75,
-                500,
-                500
-            );
-        }
+            // Upload optional files
+            $nidFront = $request->hasFile('nid_front_side')
+                ? ImageUploadHelper::upload(
+                    $request->file('nid_front_side'),  // UploadedFile
+                    'assets/images/nid',        // Folder
+                    'nid_front_'.$user->id,     // Old image to delete
+                    75,                       // Quality
+                    800,                      // Max width
+                    800                       // Max height
+                )
+                : null;
 
-        if ($request->hasFile('nid_back_side')) {
-            $user->nid_back_side = ImageUploadHelper::upload(
-                $request->file('nid_back_side'),
-                'assets/images/provider/nid',
-                'provider_nid_back_'.$user->id,
-                75,
-                500,
-                500
-            );
-        }
+            $nidBack = $request->hasFile('nid_back_side')
+                ? ImageUploadHelper::upload(
+                    $request->file('nid_back_side'),  // UploadedFile
+                    'assets/images/nid',        // Folder
+                    'nid_back_'.$user->id,     // Old image to delete
+                    75,                       // Quality
+                    800,                      // Max width
+                    800                       // Max height
+                )
+                : null;
 
-        if ($request->hasFile('certificates')) {
-            $user->certificates = ImageUploadHelper::upload(
-                $request->file('certificates'),
-                'assets/images/provider/certificates',
-                'provider_certificates_'.$user->id,
-                75,
-                500,
-                500
-            );
-        }
+            $certPaths = $request->hasFile('certificates')
+            ? ImageUploadHelper::upload(
+                $request->file('certificates'),  // UploadedFile array
+                'assets/images/certificates',    // Folder
+                'cert_'.$user->id,               // Old image prefix to delete
+                75,                               // Quality
+                800,                              // Max width
+                800                               // Max height
+            ):
+            null
+            ;
 
-        $user->save();
+                    if (
+                $request->professional_category_id ||
+                $request->education_type ||
+                $nidFront ||
+                $nidBack ||
+                $certPaths
+            ) {
+                UserDetail::updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'user_id' => $user->id,
+                        'professional_category_id' => $request->professional_category_id
+                            ? json_encode($request->professional_category_id)
+                            : null,
+                        // 'education_type' => $request->education_type,
+                    'professional_name' => $request->professional_name,
+                    'permanent_address' => $request->permanent_address,
+                    'nid_front_side' => $nidFront,
+                    'nid_back_side'  => $nidBack,
+                    'certificates'   => $certPaths,
+                ]);
+            }
+
+
 
         return ApiResponseHelper::success("Profile updated successfully",200);
     }

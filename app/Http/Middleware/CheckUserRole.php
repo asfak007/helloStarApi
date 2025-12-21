@@ -15,6 +15,7 @@ class CheckUserRole
         if (!$user) {
             return response()->json([
                 'status' => 401,
+                 'success' => false,
                 'message' => 'Unauthenticated',
             ], 401);
         }
@@ -23,6 +24,7 @@ class CheckUserRole
         if (strtolower($user->role->name) !== strtolower($role)) {
             return response()->json([
                 'status' => 403,
+                'success' => false,
                 'message' => 'Forbidden: You don’t have access to this resource',
             ], 403);
         }

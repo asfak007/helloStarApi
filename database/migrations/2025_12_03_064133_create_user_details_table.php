@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->json('professional_category_id')->nullable();
             $table->enum('education_type', ['ssc','hsc','diploma','bachelor','masters','other'])->nullable();
+            $table->string('professional_name')->nullable();
             $table->foreignId('division_id')->constrained('divisions')->cascadeOnDelete()->nullable();
             $table->foreignId('district_id')->constrained('districts')->cascadeOnDelete()->nullable();
             $table->string('area')->nullable();
