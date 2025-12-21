@@ -18,7 +18,6 @@ use App\Models\UserDetail;
 use App\Models\UserServiceCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Intervention\Image\Image;
 
 class RegistrationController extends Controller
 {
